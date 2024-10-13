@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktiver Beobachtungsbogen</title>
+    <style>
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        #chart-container {
+            width: 800px;
+            height: 800px;
+            background-color: white;
+            border: 1px solid black;
+        }
+        #chart { 
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="chart-container">
+        <svg id="chart" viewBox="0 0 800 800">
+            <!-- Der Inhalt wird dynamisch durch renderer.js generiert -->
+        </svg>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
