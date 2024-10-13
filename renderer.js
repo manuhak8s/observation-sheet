@@ -27,36 +27,20 @@ function createSector(startAngle, endAngle, color) {
 }
 
 function createCurvedField(innerRadius, outerRadius, startAngle, endAngle, color) {
-    const midAngle = (startAngle + endAngle) / 2;
-    
     const innerStartX = CENTER_X + innerRadius * Math.cos(startAngle);
     const innerStartY = CENTER_Y + innerRadius * Math.sin(startAngle);
     const outerStartX = CENTER_X + outerRadius * Math.cos(startAngle);
     const outerStartY = CENTER_Y + outerRadius * Math.sin(startAngle);
-    
-    const innerMidX = CENTER_X + innerRadius * Math.cos(midAngle);
-    const innerMidY = CENTER_Y + innerRadius * Math.sin(midAngle);
-    const outerMidX = CENTER_X + outerRadius * Math.cos(midAngle);
-    const outerMidY = CENTER_Y + outerRadius * Math.sin(midAngle);
-    
     const innerEndX = CENTER_X + innerRadius * Math.cos(endAngle);
     const innerEndY = CENTER_Y + innerRadius * Math.sin(endAngle);
     const outerEndX = CENTER_X + outerRadius * Math.cos(endAngle);
     const outerEndY = CENTER_Y + outerRadius * Math.sin(endAngle);
 
-    const leftHalf = `M${innerStartX},${innerStartY}
-                      A${innerRadius},${innerRadius} 0 0,1 ${innerMidX},${innerMidY}
-                      L${outerMidX},${outerMidY}
-                      A${outerRadius},${outerRadius} 0 0,0 ${outerStartX},${outerStartY}
-                      Z`;
-
-    const rightHalf = `M${innerMidX},${innerMidY}
-                       A${innerRadius},${innerRadius} 0 0,1 ${innerEndX},${innerEndY}
-                       L${outerEndX},${outerEndY}
-                       A${outerRadius},${outerRadius} 0 0,0 ${outerMidX},${outerMidY}
-                       Z`;
-
-    return { leftHalf, rightHalf };
+    return `M${innerStartX},${innerStartY}
+            A${innerRadius},${innerRadius} 0 0,1 ${innerEndX},${innerEndY}
+            L${outerEndX},${outerEndY}
+            A${outerRadius},${outerRadius} 0 0,0 ${outerStartX},${outerStartY}
+            Z`;
 }
 
 function createFields(dimension, startAngle, endAngle, index) {
@@ -74,7 +58,7 @@ function createFields(dimension, startAngle, endAngle, index) {
         for (let i = 0; i < fieldsInRow && fieldCount < dimension.fields; i++) {
             const fieldStartAngle = startAngle + i * fieldAngle;
             const fieldEndAngle = fieldStartAngle + fieldAngle;
-            const { leftHalf, rightHalf } = createCurvedField(innerRadius, outerRadius, fieldStartAngle, fieldEndAngle, dimension.color);
+            const fieldPath = createCurvedField(innerRadius, outerRadius, fieldStartAngle, fieldEndAngle, dimension.color);
             const centerAngle = (fieldStartAngle + fieldEndAngle) / 2;
             const centerRadius = (innerRadius + outerRadius) / 2;
             const textX = CENTER_X + centerRadius * Math.cos(centerAngle);
@@ -82,8 +66,7 @@ function createFields(dimension, startAngle, endAngle, index) {
 
             const field = `
                 <g class="field" data-state="0" data-dimension="${index}">
-                    <path class="left-half" d="${leftHalf}" fill="white" stroke="${dimension.color}" stroke-width="1" />
-                    <path class="right-half" d="${rightHalf}" fill="white" stroke="${dimension.color}" stroke-width="1" />
+                    <path d="${fieldPath}" fill="white" stroke="${dimension.color}" stroke-width="1" />
                     <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" 
                           fill="black" font-size="10">${fieldCount + 1}</text>
                 </g>
@@ -104,6 +87,22 @@ function createLabel(name, angle) {
     return `<text x="${x}" y="${y}" text-anchor="middle" fill="black" font-size="14" transform="rotate(${rotation}, ${x}, ${y})">${name}</text>`;
 }
 
+function createHalfFillPatterns(svg) {
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    dimensions.forEach(dimension => {
+        const gradientId = `gradient${dimension.color.substring(1)}`;
+        defs.innerHTML += `
+            <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:${dimension.color};stop-opacity:1" />
+                <stop offset="50%" style="stop-color:${dimension.color};stop-opacity:1" />
+                <stop offset="50%" style="stop-color:white;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:white;stop-opacity:1" />
+            </linearGradient>
+        `;
+    });
+    svg.prepend(defs);
+}
+
 function addFieldClickListeners() {
     document.querySelectorAll('.field').forEach(field => {
         field.addEventListener('click', () => {
@@ -113,21 +112,17 @@ function addFieldClickListeners() {
             
             const dimensionIndex = field.dataset.dimension;
             const color = dimensions[dimensionIndex].color;
-            const leftHalf = field.querySelector('.left-half');
-            const rightHalf = field.querySelector('.right-half');
+            const path = field.querySelector('path');
             
             switch(newState) {
                 case 0:
-                    leftHalf.setAttribute('fill', 'white');
-                    rightHalf.setAttribute('fill', 'white');
+                    path.setAttribute('fill', 'white');
                     break;
                 case 1:
-                    leftHalf.setAttribute('fill', color);
-                    rightHalf.setAttribute('fill', 'white');
+                    path.setAttribute('fill', `url(#gradient${color.substring(1)})`);
                     break;
                 case 2:
-                    leftHalf.setAttribute('fill', color);
-                    rightHalf.setAttribute('fill', color);
+                    path.setAttribute('fill', color);
                     break;
             }
         });
@@ -165,6 +160,7 @@ function initChart() {
         <g id="labels">${labelsHTML}</g>
     `;
 
+    createHalfFillPatterns(svg);
     addFieldClickListeners();
 
     console.log('Chart initialized');
