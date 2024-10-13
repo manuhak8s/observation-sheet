@@ -118,7 +118,49 @@ function initChart() {
         <g id="labels">${labelsHTML}</g>
     `;
 
+    createHalfFillPatterns(svg);
+    addFieldClickListeners();
+
     console.log('Chart initialized');
+}
+
+function createHalfFillPatterns(svg) {
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    dimensions.forEach(dimension => {
+        defs.innerHTML += `
+            <pattern id="halfFill${dimension.color.substring(1)}" patternUnits="objectBoundingBox" width="1" height="1">
+                <rect width="1" height="1" fill="white"/>
+                <rect width="0.5" height="1" fill="${dimension.color}"/>
+            </pattern>
+        `;
+    });
+    svg.prepend(defs);
+}
+
+function addFieldClickListeners() {
+    document.querySelectorAll('.field').forEach(field => {
+        field.addEventListener('click', () => {
+            const currentState = parseInt(field.dataset.state);
+            const newState = (currentState + 1) % 3;
+            field.dataset.state = newState;
+            
+            const dimensionIndex = field.dataset.dimension;
+            const color = dimensions[dimensionIndex].color;
+            const path = field.querySelector('path');
+            
+            switch(newState) {
+                case 0:
+                    path.setAttribute('fill', 'white');
+                    break;
+                case 1:
+                    path.setAttribute('fill', `url(#halfFill${color.substring(1)})`);
+                    break;
+                case 2:
+                    path.setAttribute('fill', color);
+                    break;
+            }
+        });
+    });
 }
 
 document.addEventListener('DOMContentLoaded', initChart);
