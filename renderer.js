@@ -52,7 +52,7 @@ function createFields(dimension, startAngle, endAngle, index) {
     for (let row = 0; row < ROWS && fieldCount < dimension.fields; row++) {
         const innerRadius = INNER_RADIUS + row * radiusStep;
         const outerRadius = innerRadius + radiusStep;
-        const fieldsInRow = Math.ceil(row + 1);
+        const fieldsInRow = Math.min(row + 2, dimension.fields - fieldCount);
         const fieldAngle = sectorAngle / fieldsInRow;
 
         for (let i = 0; i < fieldsInRow && fieldCount < dimension.fields; i++) {
