@@ -7,34 +7,34 @@ const dimensions = [
     { name: "Soziales Miteinander / Emotionalität", color: "#FF6347", startField: 144, endField: 169 }
 ];
 
-const SVG_WIDTH = 800;
-const SVG_HEIGHT = 800;
-const CENTER_X = SVG_WIDTH / 2;
-const CENTER_Y = SVG_HEIGHT / 2;
-const OUTER_RADIUS = 350;
-const INNER_RADIUS = 100;
-const ROWS = 10;
+const SVG_SIZE = 1000;
+const MARGIN = 50;
+const VIEWBOX_SIZE = SVG_SIZE + 2 * MARGIN;
+const CENTER = VIEWBOX_SIZE / 2;
+const OUTER_RADIUS = SVG_SIZE * 0.40;
+const INNER_RADIUS = OUTER_RADIUS * 0.3;
+const ROWS = 5;
 
 function createSector(startAngle, endAngle, color) {
     const largeArcFlag = endAngle - startAngle <= Math.PI ? "0" : "1";
     
-    const startX = CENTER_X + OUTER_RADIUS * Math.cos(startAngle);
-    const startY = CENTER_Y + OUTER_RADIUS * Math.sin(startAngle);
-    const endX = CENTER_X + OUTER_RADIUS * Math.cos(endAngle);
-    const endY = CENTER_Y + OUTER_RADIUS * Math.sin(endAngle);
+    const startX = CENTER + OUTER_RADIUS * Math.cos(startAngle);
+    const startY = CENTER + OUTER_RADIUS * Math.sin(startAngle);
+    const endX = CENTER + OUTER_RADIUS * Math.cos(endAngle);
+    const endY = CENTER + OUTER_RADIUS * Math.sin(endAngle);
     
-    return `<path d="M${CENTER_X},${CENTER_Y} L${startX},${startY} A${OUTER_RADIUS},${OUTER_RADIUS} 0 ${largeArcFlag},1 ${endX},${endY} Z" fill="${color}" fill-opacity="0.2" />`;
+    return `<path d="M${CENTER},${CENTER} L${startX},${startY} A${OUTER_RADIUS},${OUTER_RADIUS} 0 ${largeArcFlag},1 ${endX},${endY} Z" fill="${color}" fill-opacity="0.2" />`;
 }
 
 function createCurvedField(innerRadius, outerRadius, startAngle, endAngle, color) {
-    const innerStartX = CENTER_X + innerRadius * Math.cos(startAngle);
-    const innerStartY = CENTER_Y + innerRadius * Math.sin(startAngle);
-    const outerStartX = CENTER_X + outerRadius * Math.cos(startAngle);
-    const outerStartY = CENTER_Y + outerRadius * Math.sin(startAngle);
-    const innerEndX = CENTER_X + innerRadius * Math.cos(endAngle);
-    const innerEndY = CENTER_Y + innerRadius * Math.sin(endAngle);
-    const outerEndX = CENTER_X + outerRadius * Math.cos(endAngle);
-    const outerEndY = CENTER_Y + outerRadius * Math.sin(endAngle);
+    const innerStartX = CENTER + innerRadius * Math.cos(startAngle);
+    const innerStartY = CENTER + innerRadius * Math.sin(startAngle);
+    const outerStartX = CENTER + outerRadius * Math.cos(startAngle);
+    const outerStartY = CENTER + outerRadius * Math.sin(startAngle);
+    const innerEndX = CENTER + innerRadius * Math.cos(endAngle);
+    const innerEndY = CENTER + innerRadius * Math.sin(endAngle);
+    const outerEndX = CENTER + outerRadius * Math.cos(endAngle);
+    const outerEndY = CENTER + outerRadius * Math.sin(endAngle);
 
     return `M${innerStartX},${innerStartY}
             A${innerRadius},${innerRadius} 0 0,1 ${innerEndX},${innerEndY}
@@ -63,8 +63,8 @@ function createFields(dimension, startAngle, endAngle, index) {
             const fieldPath = createCurvedField(innerRadius, outerRadius, fieldStartAngle, fieldEndAngle, dimension.color);
             const centerAngle = (fieldStartAngle + fieldEndAngle) / 2;
             const centerRadius = (innerRadius + outerRadius) / 2;
-            const textX = CENTER_X + centerRadius * Math.cos(centerAngle);
-            const textY = CENTER_Y + centerRadius * Math.sin(centerAngle);
+            const textX = CENTER + centerRadius * Math.cos(centerAngle);
+            const textY = CENTER + centerRadius * Math.sin(centerAngle);
 
             const fieldNumber = dimension.startField + fieldCount;
             const field = `
@@ -83,9 +83,9 @@ function createFields(dimension, startAngle, endAngle, index) {
 }
 
 function createLabel(name, angle) {
-    const radius = OUTER_RADIUS + 30;
-    const x = CENTER_X + radius * Math.cos(angle);
-    const y = CENTER_Y + radius * Math.sin(angle);
+    const radius = OUTER_RADIUS + 60;
+    const x = CENTER + radius * Math.cos(angle);
+    const y = CENTER + radius * Math.sin(angle);
     const rotation = (angle * 180 / Math.PI + 90) % 360;
     return `<text x="${x}" y="${y}" text-anchor="middle" fill="black" font-size="14" transform="rotate(${rotation}, ${x}, ${y})">${name}</text>`;
 }
@@ -134,11 +134,15 @@ function addFieldClickListeners() {
 
 function initChart() {
     console.log('initChart called');
+    console.log('initChart called');
     const svg = document.getElementById('chart');
     if (!svg) {
         console.error('SVG element not found');
         return;
     }
+
+    svg.setAttribute('viewBox', `0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
     let sectorsHTML = '';
     let fieldsHTML = '';
@@ -169,5 +173,27 @@ function initChart() {
     console.log('Chart initialized');
 }
 
+function resizeChart() {
+    const container = document.getElementById('chart-container');
+    const svg = document.getElementById('chart');
+    const aspect = VIEWBOX_SIZE / VIEWBOX_SIZE;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    if (containerWidth / containerHeight > aspect) {
+        svg.style.width = `${containerHeight * aspect}px`;
+        svg.style.height = `${containerHeight}px`;
+    } else {
+        svg.style.width = `${containerWidth}px`;
+        svg.style.height = `${containerWidth / aspect}px`;
+    }
+}
 
-document.addEventListener('DOMContentLoaded', initChart);
+// Event-Listener für Fenstergrößenänderungen
+window.addEventListener('resize', resizeChart);
+
+// Initialisierung
+document.addEventListener('DOMContentLoaded', () => {
+    initChart();
+    resizeChart();
+});
