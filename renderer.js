@@ -1,10 +1,10 @@
 const dimensions = [
-    { name: "Motorische Entwicklung", color: "#FFB3BA", fields: 55 },
-    { name: "Sprachentwicklung", color: "#BAFFC9", fields: 55 },
-    { name: "Kognitive Entwicklung", color: "#BAE1FF", fields: 55 },
-    { name: "Sozial-emotionale Entwicklung", color: "#FFDFBA", fields: 55 },
-    { name: "Spielverhalten", color: "#FFFFBA", fields: 55 },
-    { name: "Selbstständigkeit", color: "#E0BAFF", fields: 55 }
+    { name: "Spielen", color: "#90EE90", startField: 1, endField: 38 },
+    { name: "Sprechen, Hören, Sehen", color: "#FFA500", startField: 39, endField: 61 },
+    { name: "Denken", color: "#40E0D0", startField: 62, endField: 90 },
+    { name: "Bewegung", color: "#FFC0CB", startField: 91, endField: 114 },
+    { name: "Lebenspraxis", color: "#87CEEB", startField: 115, endField: 143 },
+    { name: "Soziales Miteinander / Emotionalität", color: "#FF6347", startField: 144, endField: 169 }
 ];
 
 const SVG_WIDTH = 800;
@@ -48,14 +48,16 @@ function createFields(dimension, startAngle, endAngle, index) {
     const sectorAngle = endAngle - startAngle;
     const radiusStep = (OUTER_RADIUS - INNER_RADIUS) / ROWS;
     
+    const totalFields = dimension.endField - dimension.startField + 1;
     let fieldCount = 0;
-    for (let row = 0; row < ROWS && fieldCount < dimension.fields; row++) {
+    
+    for (let row = 0; row < ROWS && fieldCount < totalFields; row++) {
         const innerRadius = INNER_RADIUS + row * radiusStep;
         const outerRadius = innerRadius + radiusStep;
-        const fieldsInRow = Math.min(row + 2, dimension.fields - fieldCount);
+        const fieldsInRow = Math.min(row + 2, totalFields - fieldCount);
         const fieldAngle = sectorAngle / fieldsInRow;
 
-        for (let i = 0; i < fieldsInRow && fieldCount < dimension.fields; i++) {
+        for (let i = 0; i < fieldsInRow && fieldCount < totalFields; i++) {
             const fieldStartAngle = startAngle + i * fieldAngle;
             const fieldEndAngle = fieldStartAngle + fieldAngle;
             const fieldPath = createCurvedField(innerRadius, outerRadius, fieldStartAngle, fieldEndAngle, dimension.color);
@@ -64,11 +66,12 @@ function createFields(dimension, startAngle, endAngle, index) {
             const textX = CENTER_X + centerRadius * Math.cos(centerAngle);
             const textY = CENTER_Y + centerRadius * Math.sin(centerAngle);
 
+            const fieldNumber = dimension.startField + fieldCount;
             const field = `
                 <g class="field" data-state="0" data-dimension="${index}">
                     <path d="${fieldPath}" fill="white" stroke="${dimension.color}" stroke-width="1" />
                     <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" 
-                          fill="black" font-size="10">${fieldCount + 1}</text>
+                          fill="black" font-size="10">${fieldNumber}</text>
                 </g>
             `;
             fields.push(field);
@@ -165,5 +168,6 @@ function initChart() {
 
     console.log('Chart initialized');
 }
+
 
 document.addEventListener('DOMContentLoaded', initChart);
