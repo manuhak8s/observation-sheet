@@ -13,7 +13,7 @@ const VIEWBOX_SIZE = SVG_SIZE + 2 * MARGIN;
 const CENTER = VIEWBOX_SIZE / 2;
 const OUTER_RADIUS = SVG_SIZE * 0.40;
 const INNER_RADIUS = OUTER_RADIUS * 0.3;
-const ROWS = 5;
+const ROWS = 10;
 
 function createSector(startAngle, endAngle, color) {
     const largeArcFlag = endAngle - startAngle <= Math.PI ? "0" : "1";
@@ -50,32 +50,68 @@ function createFields(dimension, startAngle, endAngle, index) {
     
     const totalFields = dimension.endField - dimension.startField + 1;
     let fieldCount = 0;
-    
-    for (let row = 0; row < ROWS && fieldCount < totalFields; row++) {
-        const innerRadius = INNER_RADIUS + row * radiusStep;
-        const outerRadius = innerRadius + radiusStep;
-        const fieldsInRow = Math.min(row + 2, totalFields - fieldCount);
-        const fieldAngle = sectorAngle / fieldsInRow;
 
-        for (let i = 0; i < fieldsInRow && fieldCount < totalFields; i++) {
-            const fieldStartAngle = startAngle + i * fieldAngle;
-            const fieldEndAngle = fieldStartAngle + fieldAngle;
-            const fieldPath = createCurvedField(innerRadius, outerRadius, fieldStartAngle, fieldEndAngle, dimension.color);
-            const centerAngle = (fieldStartAngle + fieldEndAngle) / 2;
-            const centerRadius = (innerRadius + outerRadius) / 2;
-            const textX = CENTER + centerRadius * Math.cos(centerAngle);
-            const textY = CENTER + centerRadius * Math.sin(centerAngle);
+    // Spezielle Behandlung für die erste Dimension (Spielen)
+    if (index === 0) {
+        const rowLayout = [8, 8, 8, 8, 6]; // Anzahl der Felder pro Reihe für Dimension 1
+        const standardFieldAngle = sectorAngle / 8; // Basierend auf den ersten 4 Reihen
+        
+        for (let row = 0; row < rowLayout.length; row++) {
+            const innerRadius = INNER_RADIUS + row * radiusStep;
+            const fieldsInRow = rowLayout[row];
+            
+            for (let i = 0; i < fieldsInRow && fieldCount < totalFields; i++) {
+                const fieldNumber = dimension.startField + fieldCount;
+                const isDoubleHeight = fieldNumber === 31 || fieldNumber === 32;
+                const outerRadius = isDoubleHeight ? innerRadius + 2 * radiusStep : innerRadius + radiusStep;
 
-            const fieldNumber = dimension.startField + fieldCount;
-            const field = `
-                <g class="field" data-state="0" data-dimension="${index}">
-                    <path d="${fieldPath}" fill="white" stroke="${dimension.color}" stroke-width="1" />
-                    <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" 
-                          fill="black" font-size="10">${fieldNumber}</text>
-                </g>
-            `;
-            fields.push(field);
-            fieldCount++;
+                const fieldStartAngle = startAngle + i * standardFieldAngle;
+                const fieldEndAngle = fieldStartAngle + standardFieldAngle;
+                const fieldPath = createCurvedField(innerRadius, outerRadius, fieldStartAngle, fieldEndAngle, dimension.color);
+                const centerAngle = (fieldStartAngle + fieldEndAngle) / 2;
+                const centerRadius = (innerRadius + outerRadius) / 2;
+                const textX = CENTER + centerRadius * Math.cos(centerAngle);
+                const textY = CENTER + centerRadius * Math.sin(centerAngle);
+
+                const field = `
+                    <g class="field" data-state="0" data-dimension="${index}">
+                        <path d="${fieldPath}" fill="white" stroke="${dimension.color}" stroke-width="1" />
+                        <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" 
+                              fill="black" font-size="10">${fieldNumber}</text>
+                    </g>
+                `;
+                fields.push(field);
+                fieldCount++;
+            }
+        }
+    } else {
+        // Ursprüngliche Logik für andere Dimensionen
+        for (let row = 0; row < ROWS && fieldCount < totalFields; row++) {
+            const innerRadius = INNER_RADIUS + row * radiusStep;
+            const outerRadius = innerRadius + radiusStep;
+            const fieldsInRow = Math.min(row + 2, totalFields - fieldCount);
+            const fieldAngle = sectorAngle / fieldsInRow;
+
+            for (let i = 0; i < fieldsInRow && fieldCount < totalFields; i++) {
+                const fieldStartAngle = startAngle + i * fieldAngle;
+                const fieldEndAngle = fieldStartAngle + fieldAngle;
+                const fieldPath = createCurvedField(innerRadius, outerRadius, fieldStartAngle, fieldEndAngle, dimension.color);
+                const centerAngle = (fieldStartAngle + fieldEndAngle) / 2;
+                const centerRadius = (innerRadius + outerRadius) / 2;
+                const textX = CENTER + centerRadius * Math.cos(centerAngle);
+                const textY = CENTER + centerRadius * Math.sin(centerAngle);
+
+                const fieldNumber = dimension.startField + fieldCount;
+                const field = `
+                    <g class="field" data-state="0" data-dimension="${index}">
+                        <path d="${fieldPath}" fill="white" stroke="${dimension.color}" stroke-width="1" />
+                        <text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="central" 
+                              fill="black" font-size="10">${fieldNumber}</text>
+                    </g>
+                `;
+                fields.push(field);
+                fieldCount++;
+            }
         }
     }
     
@@ -197,3 +233,22 @@ document.addEventListener('DOMContentLoaded', () => {
     initChart();
     resizeChart();
 });
+
+
+/*
+
+cool, nun für dimension 2:
+
+Reihe 1: 39,40,41,42
+
+Reihe 2: 43,44,45,46
+
+Reihe 3: 47,48,49,50
+
+Reihe 4: 51,52,53,54
+
+Reihe 5: 55,56,57,58(doppelte Höhe)
+
+Reihe 6: 59,60,61
+
+*/
