@@ -1,4 +1,4 @@
-import { initChart, resizeChart } from './chartInitialization.js';
+import { initChart, resizeChart } from './components/chart/chartInitialization.js';
 
 window.addEventListener('resize', resizeChart);
 
