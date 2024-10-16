@@ -1,10 +1,13 @@
-import { INNER_RADIUS, OUTER_RADIUS, ROWS, CENTER } from './constants.js';
+import { 
+    CENTER_X, CENTER_Y, INNER_RADIUS_Y, OUTER_RADIUS_Y, 
+    ROWS, HORIZONTAL_SCALE 
+} from './constants.js';
 import { createCurvedField } from './svgHelpers.js';
 
 export function createFields(dimension, startAngle, endAngle, index) {
     const fields = [];
     const sectorAngle = endAngle - startAngle;
-    const radiusStep = (OUTER_RADIUS - INNER_RADIUS) / ROWS;
+    const radiusStep = (OUTER_RADIUS_Y - INNER_RADIUS_Y) / ROWS;
     
     const totalFields = dimension.endField - dimension.startField + 1;
     let fieldCount = 0;
@@ -15,7 +18,7 @@ export function createFields(dimension, startAngle, endAngle, index) {
         const standardFieldAngle = sectorAngle / 8;
         
         for (let row = 0; row < rowLayout.length; row++) {
-            const innerRadius = INNER_RADIUS + row * radiusStep;
+            const innerRadius = INNER_RADIUS_Y + row * radiusStep;
             const fieldsInRow = rowLayout[row];
             
             for (let i = 0; i < fieldsInRow && fieldCount < totalFields; i++) {
@@ -35,7 +38,7 @@ export function createFields(dimension, startAngle, endAngle, index) {
         const standardFieldAngle = sectorAngle / 4;
         
         for (let row = 0; row < rowLayout.length; row++) {
-            const innerRadius = INNER_RADIUS + row * radiusStep;
+            const innerRadius = INNER_RADIUS_Y + row * radiusStep;
             const fieldsInRow = rowLayout[row];
             
             for (let i = 0; i < fieldsInRow && fieldCount < totalFields; i++) {
@@ -55,7 +58,7 @@ export function createFields(dimension, startAngle, endAngle, index) {
         const standardFieldAngle = sectorAngle / 6;
         
         for (let row = 0; row < rowLayout.length; row++) {
-            const innerRadius = INNER_RADIUS + row * radiusStep;
+            const innerRadius = INNER_RADIUS_Y + row * radiusStep;
             const fieldsInRow = rowLayout[row];
             
             for (let i = 0; i < fieldsInRow && fieldCount < totalFields; i++) {
@@ -75,7 +78,7 @@ export function createFields(dimension, startAngle, endAngle, index) {
         const standardFieldAngle = sectorAngle / 5;
         
         for (let row = 0; row < rowLayout.length; row++) {
-            const innerRadius = INNER_RADIUS + row * radiusStep;
+            const innerRadius = INNER_RADIUS_Y + row * radiusStep;
             const fieldsInRow = rowLayout[row];
             
             for (let i = 0; i < fieldsInRow && fieldCount < totalFields; i++) {
@@ -95,7 +98,7 @@ export function createFields(dimension, startAngle, endAngle, index) {
         const standardFieldAngle = sectorAngle / 6;
         
         for (let row = 0; row < rowLayout.length; row++) {
-            const innerRadius = INNER_RADIUS + row * radiusStep;
+            const innerRadius = INNER_RADIUS_Y + row * radiusStep;
             const fieldsInRow = rowLayout[row];
             
             for (let i = 0; i < fieldsInRow && fieldCount < totalFields; i++) {
@@ -112,10 +115,10 @@ export function createFields(dimension, startAngle, endAngle, index) {
     } else if (index === 5) {
         // Layout für Dimension 6 (Soziales Miteinander / Emotionalität)
         const rowLayout = [5, 5, 5, 5, 5, 1];
-        const standardFieldAngle = sectorAngle / 5; // Basierend auf 5 Feldern pro Reihe
+        const standardFieldAngle = sectorAngle / 5;
         
         for (let row = 0; row < rowLayout.length; row++) {
-            const innerRadius = INNER_RADIUS + row * radiusStep;
+            const innerRadius = INNER_RADIUS_Y + row * radiusStep;
             const fieldsInRow = rowLayout[row];
             
             for (let i = 0; i < fieldsInRow && fieldCount < totalFields; i++) {
@@ -136,25 +139,6 @@ export function createFields(dimension, startAngle, endAngle, index) {
             }
         }
     }
-    else {
-        // Gleichmäßige Verteilung für andere Dimensionen
-        const fieldsPerRow = Math.ceil(totalFields / ROWS);
-        const standardFieldAngle = sectorAngle / fieldsPerRow;
-
-        for (let row = 0; row < ROWS && fieldCount < totalFields; row++) {
-            const innerRadius = INNER_RADIUS + row * radiusStep;
-            const outerRadius = innerRadius + radiusStep;
-            const fieldsInThisRow = Math.min(fieldsPerRow, totalFields - fieldCount);
-
-            for (let i = 0; i < fieldsInThisRow; i++) {
-                const fieldStartAngle = startAngle + i * standardFieldAngle;
-                const fieldEndAngle = fieldStartAngle + standardFieldAngle;
-                const fieldNumber = dimension.startField + fieldCount;
-                fields.push(createFieldElement(dimension, fieldNumber, innerRadius, outerRadius, fieldStartAngle, fieldEndAngle, index));
-                fieldCount++;
-            }
-        }
-    }
     
     return fields.join('');
 }
@@ -163,8 +147,8 @@ function createFieldElement(dimension, fieldNumber, innerRadius, outerRadius, st
     const fieldPath = createCurvedField(innerRadius, outerRadius, startAngle, endAngle, dimension.color);
     const centerAngle = (startAngle + endAngle) / 2;
     const centerRadius = (innerRadius + outerRadius) / 2;
-    const textX = CENTER + centerRadius * Math.cos(centerAngle);
-    const textY = CENTER + centerRadius * Math.sin(centerAngle);
+    const textX = CENTER_X + (centerRadius * HORIZONTAL_SCALE) * Math.cos(centerAngle);
+    const textY = CENTER_Y + centerRadius * Math.sin(centerAngle);
 
     return `
         <g class="field" data-state="0" data-dimension="${dimensionIndex}">

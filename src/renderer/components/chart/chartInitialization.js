@@ -1,4 +1,7 @@
-import { VIEWBOX_SIZE } from './constants.js';
+import { 
+    VIEWBOX_WIDTH, VIEWBOX_HEIGHT, 
+    CENTER_X, CENTER_Y 
+} from './constants.js';
 import { dimensions } from './dimensions.js';
 import { createSector, createLabel, createHalfFillPatterns } from './svgHelpers.js';
 import { createFields } from './fieldCreation.js';
@@ -12,7 +15,7 @@ export function initChart() {
         return;
     }
 
-    svg.setAttribute('viewBox', `0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`);
+    svg.setAttribute('viewBox', `0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`);
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
     let sectorsHTML = '';
@@ -55,7 +58,7 @@ export function initChart() {
 export function resizeChart() {
     const container = document.getElementById('chart-container');
     const svg = document.getElementById('chart');
-    const aspect = VIEWBOX_SIZE / VIEWBOX_SIZE;
+    const aspect = VIEWBOX_WIDTH / VIEWBOX_HEIGHT;
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
     
