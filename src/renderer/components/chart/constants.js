@@ -1,0 +1,13 @@
+export const SVG_WIDTH = 1400;
+export const SVG_HEIGHT = 1000;
+export const MARGIN = 50;
+export const VIEWBOX_WIDTH = SVG_WIDTH + 2 * MARGIN;
+export const VIEWBOX_HEIGHT = SVG_HEIGHT + 2 * MARGIN;
+export const CENTER_X = VIEWBOX_WIDTH / 2;
+export const CENTER_Y = VIEWBOX_HEIGHT / 2;
+export const OUTER_RADIUS_X = SVG_WIDTH * 0.40;
+export const OUTER_RADIUS_Y = SVG_HEIGHT * 0.40;
+export const INNER_RADIUS_X = OUTER_RADIUS_X * 0.3;
+export const INNER_RADIUS_Y = OUTER_RADIUS_Y * 0.3;
+export const HORIZONTAL_SCALE = OUTER_RADIUS_X / OUTER_RADIUS_Y;
+export const ROWS = 6;
